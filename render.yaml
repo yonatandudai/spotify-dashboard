@@ -1,9 +1,11 @@
 services:
   - type: web
-    name: spotify-profile-app
+    name: spotify-dashboard
     runtime: python
     buildCommand: "pip install -r requirements.txt && cd spotify-profile-demo && npm install && npm run build"
     startCommand: "python main.py"
+    plan: free
+    healthCheckPath: /
     envVars:
       - key: SPOTIFY_CLIENT_ID
         sync: false
@@ -13,3 +15,5 @@ services:
         sync: false
       - key: SESSION_SECRET_KEY
         sync: false
+      - key: ENVIRONMENT
+        value: production

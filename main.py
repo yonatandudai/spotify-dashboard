@@ -6,12 +6,17 @@ from typing import Optional, Dict, Any
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
 app = FastAPI(title="Spotify Profile API")
+
+# Serve static files from the frontend build (for local development)
+if os.path.exists("spotify-profile-demo/dist") and os.getenv("VERCEL") != "1":
+    app.mount("/static", StaticFiles(directory="spotify-profile-demo/dist"), name="static")
 
 # Configure CORS - Production ready
 app.add_middleware(
@@ -218,10 +223,11 @@ async def callback(request: Request, response: Response, code: str = None, state
     session_id = set_user_session(response, session_data)
     print(f"DEBUG: Session created with ID: {session_id}")
     
-    # Redirect back to frontend with session info in URL for debugging
-    frontend_url = f"http://localhost:3000?auth_complete=true&session_id={session_id}"
-    print(f"DEBUG: Redirecting to: {frontend_url}")
-    return RedirectResponse(url=frontend_url)
+    # Redirect back to frontend
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    redirect_url = f"{frontend_url}?auth_complete=true&session_id={session_id}"
+    print(f"DEBUG: Redirecting to: {redirect_url}")
+    return RedirectResponse(url=redirect_url)
 
 @app.get("/api/auth/callback/")
 async def callback_with_slash(request: Request, response: Response, code: str = None, state: str = None, error: str = None):
