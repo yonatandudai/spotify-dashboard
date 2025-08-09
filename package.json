@@ -1,0 +1,22 @@
+{
+  "name": "spotify-profile-fullstack",
+  "version": "1.0.0",
+  "description": "A full-stack Spotify profile application with React frontend and FastAPI backend",
+  "scripts": {
+    "install-frontend": "cd spotify-profile-demo && npm install",
+    "install-backend": "pip install -r requirements.txt",
+    "build-frontend": "cd spotify-profile-demo && npm run build",
+    "start-backend": "python main.py",
+    "start-frontend": "cd spotify-profile-demo && npm run preview",
+    "dev-frontend": "cd spotify-profile-demo && npm run dev",
+    "dev-backend": "python main.py",
+    "deploy": "npm run install-frontend && npm run build-frontend"
+  },
+  "keywords": ["spotify", "react", "fastapi", "oauth", "music", "api"],
+  "author": "Yonatan",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "python": ">=3.8"
+  }
+}
