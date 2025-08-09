@@ -3,10 +3,16 @@ import secrets
 import urllib.parse
 import requests
 from typing import Optional, Dict, Any
-from fastapi import FastAPI, HTTPException, Request, Response
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
-from mangum import Mangum
+
+try:
+    from fastapi import FastAPI, HTTPException, Request, Response
+    from fastapi.middleware.cors import CORSMiddleware
+    from fastapi.responses import RedirectResponse
+    from mangum import Mangum
+    print("✅ All imports successful")
+except ImportError as e:
+    print(f"❌ Import error: {e}")
+    raise
 
 # FastAPI app
 app = FastAPI(title="Spotify Profile API")
@@ -96,7 +102,22 @@ def make_spotify_request(endpoint: str, access_token: str) -> Dict[str, Any]:
 
 @app.get("/")
 async def root():
-    return {"message": "Spotify Profile API is running!"}
+    return {"message": "Spotify Profile API is running!", "timestamp": "2025-08-09", "version": "1.0"}
+
+@app.get("/api")
+async def api_root():
+    return {"message": "API endpoint working!", "routes": ["auth/login", "auth/callback", "user/profile", "user/top-tracks", "user/top-artists"]}
+
+@app.get("/api/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "env_vars": {
+            "client_id_set": bool(SPOTIFY_CLIENT_ID),
+            "client_secret_set": bool(SPOTIFY_CLIENT_SECRET),
+            "redirect_uri": SPOTIFY_REDIRECT_URI
+        }
+    }
 
 @app.get("/api/config/check")
 async def check_config():
@@ -285,5 +306,25 @@ async def logout(response: Response, request: Request):
     response.delete_cookie("session_id")
     return {"message": "Logged out successfully"}
 
-# Vercel handler
-handler = Mangum(app)
+# Add some debugging for Vercel
+print("🚀 API module loaded successfully")
+print(f"🔍 Environment check:")
+print(f"  - SPOTIFY_CLIENT_ID: {os.getenv('SPOTIFY_CLIENT_ID', 'NOT_SET')}")
+print(f"  - SPOTIFY_CLIENT_SECRET: {'SET' if os.getenv('SPOTIFY_CLIENT_SECRET') else 'NOT_SET'}")
+print(f"  - SPOTIFY_REDIRECT_URI: {os.getenv('SPOTIFY_REDIRECT_URI', 'NOT_SET')}")
+
+# Create the Mangum handler for Vercel
+try:
+    handler = Mangum(app, lifespan="off")
+    print("✅ Mangum handler created successfully")
+except Exception as e:
+    print(f"❌ Error creating Mangum handler: {e}")
+    # Fallback handler for testing
+    def handler(event, context):
+        return {
+            "statusCode": 500,
+            "body": f"Handler creation failed: {str(e)}"
+        }
+
+# Also export the app directly for testing
+__all__ = ["app", "handler"]
