@@ -9,7 +9,6 @@ try:
     from fastapi.middleware.cors import CORSMiddleware
     from fastapi.responses import RedirectResponse
     from mangum import Mangum
-    print("✅ All imports successful")
 except ImportError as e:
     print(f"❌ Import error: {e}")
     raise
@@ -313,18 +312,8 @@ print(f"  - SPOTIFY_CLIENT_ID: {os.getenv('SPOTIFY_CLIENT_ID', 'NOT_SET')}")
 print(f"  - SPOTIFY_CLIENT_SECRET: {'SET' if os.getenv('SPOTIFY_CLIENT_SECRET') else 'NOT_SET'}")
 print(f"  - SPOTIFY_REDIRECT_URI: {os.getenv('SPOTIFY_REDIRECT_URI', 'NOT_SET')}")
 
-# Create the Mangum handler for Vercel
-try:
-    handler = Mangum(app, lifespan="off")
-    print("✅ Mangum handler created successfully")
-except Exception as e:
-    print(f"❌ Error creating Mangum handler: {e}")
-    # Fallback handler for testing
-    def handler(event, context):
-        return {
-            "statusCode": 500,
-            "body": f"Handler creation failed: {str(e)}"
-        }
+# Create the handler for Vercel
+from mangum import Mangum
 
-# Also export the app directly for testing
-__all__ = ["app", "handler"]
+# Create the Mangum handler
+handler = Mangum(app)
