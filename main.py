@@ -14,6 +14,12 @@ load_dotenv()
 
 app = FastAPI(title="Spotify Profile API")
 
+# Debug: Print environment variables (remove in production)
+print(f"🔍 DEBUG: SPOTIFY_CLIENT_ID = {os.getenv('SPOTIFY_CLIENT_ID')[:10]}..." if os.getenv('SPOTIFY_CLIENT_ID') else "❌ SPOTIFY_CLIENT_ID not found")
+print(f"🔍 DEBUG: SPOTIFY_CLIENT_SECRET = {'***configured***' if os.getenv('SPOTIFY_CLIENT_SECRET') else '❌ not found'}")
+print(f"🔍 DEBUG: SPOTIFY_REDIRECT_URI = {os.getenv('SPOTIFY_REDIRECT_URI')}")
+print(f"🔍 DEBUG: SESSION_SECRET_KEY = {'***configured***' if os.getenv('SESSION_SECRET_KEY') else '❌ not found'}")
+
 # Serve static files from the frontend build (for local development)
 if os.path.exists("spotify-profile-demo/dist") and os.getenv("VERCEL") != "1":
     app.mount("/static", StaticFiles(directory="spotify-profile-demo/dist"), name="static")
@@ -357,6 +363,7 @@ async def logout(response: Response, request: Request):
 
 if __name__ == "__main__":
     import uvicorn
-    # Use PORT from environment for deployment platforms
-    port = int(os.getenv("PORT", 8000))
+    # Use PORT from environment for deployment platforms, or 8001 for local testing
+    port = int(os.getenv("PORT", 8001))
+    print(f"🚀 Starting server on port {port}")
     uvicorn.run(app, host="0.0.0.0", port=port)
