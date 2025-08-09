@@ -1,0 +1,12 @@
+version: 2
+build:
+  commands:
+    - npm run install-frontend
+    - npm run build-frontend
+    - pip install -r requirements.txt
+start:
+  command: python main.py
+environments:
+  production:
+    variables:
+      PORT: ${{ PORT }}
